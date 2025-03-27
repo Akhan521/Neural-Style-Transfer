@@ -5,41 +5,17 @@ We'll further develop this program using Flask and deploy it on Google Cloud Pla
 '''
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 import torchvision.transforms as transforms
-import torchvision.models as models
+from torchvision.models import vgg19, VGG19_Weights
+
+from utils.image_loader import load_image, show_image, show_content_and_style_images
+from modules.normalization.norm import cnn_norm_mean, cnn_norm_std
+from model.nst_model import run_style_transfer
 
 from PIL import Image
 import matplotlib.pyplot as plt
-
-import copy 
-
-def load_image(image_path):
-    # Load the image using PIL.
-    image = Image.open(image_path)
-
-    # Transform the image and add a dummy batch dimension to fit the model's input dimensions.
-    image = loader(image).unsqueeze(0)
-
-    return image.to(device, torch.float)
-
-def show_image(tensor, title=None):
-    # Clone the tensor to avoid modifying the original tensor.
-    image = tensor.cpu().clone()
-
-    # Remove the dummy batch dimension that we added earlier and convert the tensor to a PIL image.
-    image = image.squeeze(0)
-    image = unloader(image)
-
-    # Display the image.
-    plt.imshow(image)
-    if title:
-        plt.title(title)
-
-    # To ensure that the plot is updated, we need to pause for a bit.
-    plt.pause(0.001) 
-
-
 
 if __name__ == '__main__':
     
@@ -47,31 +23,21 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.set_default_device(device)
 
-    # Specify the max resolution for our images.
-    max_res = 512 if torch.cuda.is_available() else 128
-
-    # Define a transformer to resize the image and convert it to a tensor.
-    loader = transforms.Compose([
-        transforms.Resize(max_res),
-        transforms.ToTensor()
-    ])
-
     # Load the content and style images.
     content_image = load_image("images/content_images/dancing.jpg")
     style_image = load_image("images/style_images/picasso.jpg")
 
-    # To display our images from tensors, we need to convert them back to PIL images.
-    unloader = transforms.ToPILImage()
+    # Display the content and style images.
+    plt.ion()
+    show_content_and_style_images(content_image, style_image)
 
-    # Display the content and style images:
-    plt.figure(figsize=(10, 5))
+    # Load the VGG19 model and set it to evaluation mode.
+    cnn = vgg19(weights=VGG19_Weights.DEFAULT).features.eval()
 
-    # Display the content image on the left.
-    plt.subplot(1, 2, 1)
-    show_image(content_image, title='Content Image')
+    # Set the input image.
+    input_image = content_image.clone()
 
-    # Display the style image on the right.
-    plt.subplot(1, 2, 2)
-    show_image(style_image, title='Style Image')
-
-    plt.show()
+    # Run the style transfer algorithm.
+    stylized_image = run_style_transfer(cnn, cnn_norm_mean, cnn_norm_std,
+                                        content_image, style_image, input_image)
+    
