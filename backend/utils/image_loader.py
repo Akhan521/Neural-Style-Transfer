@@ -29,13 +29,19 @@ def load_image(image_path):
 
     return image.to(device, torch.float)
 
-def show_image(tensor, title=None):
+def tensor_to_image(tensor):
     # Clone the tensor to avoid modifying the original tensor.
     image = tensor.cpu().clone()
 
     # Remove the dummy batch dimension that we added earlier and convert the tensor to a PIL image.
     image = image.squeeze(0)
     image = unloader(image)
+
+    return image
+
+def show_image(tensor, title=None):
+    # Convert the tensor to a PIL image.
+    image = tensor_to_image(tensor)
 
     # Display the image.
     plt.imshow(image)

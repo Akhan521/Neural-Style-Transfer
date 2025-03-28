@@ -19,7 +19,6 @@ from modules.loss_functions.style_loss import StyleLoss
 
 import matplotlib.pyplot as plt
 
-
 # Desired layers to insert content and style loss modules after.
 default_content_layers = ['conv_4']
 default_style_layers = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
@@ -110,15 +109,15 @@ def run_style_transfer(cnn, norm_mean, norm_std,
                        content_image, style_image, input_image,
                        num_steps=1000, style_weight=1e4, content_weight=1e-2):
     
-    # To display our intermediate images...
-    plt.ion()
-    figure, axes = plt.subplots(figsize=(5, 5))
-    plt.axis('off')
+    # # To display our intermediate images...
+    # plt.ion()
+    # figure, axes = plt.subplots(figsize=(5, 5))
+    # plt.axis('off')
 
-    # Displaying our input image before optimization.
-    show_image(input_image, title='Input Image (Before Optimization)')
-    figure.canvas.draw()
-    plt.pause(0.5)
+    # # Displaying our input image before optimization.
+    # show_image(input_image, title='Input Image (Before Optimization)')
+    # figure.canvas.draw()
+    # plt.pause(0.5)
 
     # Get the NST model and the content and style losses.
     model, style_losses, content_losses = get_nst_model_and_losses(cnn, norm_mean, norm_std,
@@ -173,10 +172,10 @@ def run_style_transfer(cnn, norm_mean, norm_std,
 
             if iteration[0] % 50 == 0:
                 print(f'Iteration {iteration[0]}:\n\t Style Loss: {style_score.item():.4f}\n\t Content Loss: {content_score.item():.4f}\n')
-                # Display the input image after every 50 iterations.
-                show_image(input_image, title=f'Input Image (Iteration {iteration[0]})')
-                figure.canvas.draw()
-                plt.pause(0.5)
+                # # Display the input image after every 50 iterations.
+                # show_image(input_image, title=f'Input Image (Iteration {iteration[0]})')
+                # figure.canvas.draw()
+                # plt.pause(0.5)
 
             return style_score + content_score
         
