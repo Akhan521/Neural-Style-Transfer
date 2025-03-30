@@ -1,3 +1,21 @@
-.venv/
+# Ignore Python bytecode
 __pycache__/
 *.pyc
+
+# Ignore virtual environments
+venv/
+.env/
+
+# Ignore static files (stored in Firebase Storage)
+static/
+
+# Ignore temporary files
+*.tmp
+*.log
+
+# Ignore development files
+.git/
+.gitignore
+README.md
+
+*.json
