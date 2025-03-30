@@ -107,7 +107,8 @@ def get_input_optimizer(input_image):
 
 def run_style_transfer(cnn, norm_mean, norm_std,
                        content_image, style_image, input_image,
-                       num_steps=1000, style_weight=1e4, content_weight=1e-2):
+                       num_steps=1000, style_weight=1e4, content_weight=1e-2,
+                       progress_callback=None):
     
     # # To display our intermediate images...
     # plt.ion()
@@ -170,12 +171,9 @@ def run_style_transfer(cnn, norm_mean, norm_std,
             # Update the iteration counter.
             iteration[0] += 1
 
-            if iteration[0] % 50 == 0:
-                print(f'Iteration {iteration[0]}:\n\t Style Loss: {style_score.item():.4f}\n\t Content Loss: {content_score.item():.4f}\n')
-                # # Display the input image after every 50 iterations.
-                # show_image(input_image, title=f'Input Image (Iteration {iteration[0]})')
-                # figure.canvas.draw()
-                # plt.pause(0.5)
+            # If we have a progress callback, call it with the current iteration and total steps.
+            if progress_callback:
+                progress_callback(iteration[0], num_steps)
 
             return style_score + content_score
         

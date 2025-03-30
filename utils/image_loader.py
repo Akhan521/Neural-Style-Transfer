@@ -9,11 +9,15 @@ import matplotlib.pyplot as plt
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Specify the max resolution for our images.
-max_res = 128
+max_res = 512 if torch.cuda.is_available() else 128
 
 # Define a transformer to resize the image and convert it to a tensor.
 loader = transforms.Compose([
+    # Resize the image to the max resolution while maintaining the aspect ratio.
     transforms.Resize(max_res),
+    # Center crop the image to a square shape to ensure all images are the same size.
+    transforms.CenterCrop(max_res),
+    # Convert the image to a tensor.
     transforms.ToTensor()
 ])
 
