@@ -12,8 +12,10 @@ Transform your photos into works of art using Neural Style Transfer! This PyQt6 
 ##  🛠 Installation
 
 ###  🚀 Download
-For users who don't want to install Python, you can download the pre-built executable:
+For users who don't want to install Python, you can download the pre-built executable below:
+- [Windows Executable](https://github.com/Akhan521/Neural-Style-Transfer/releases/download/v1.0.0/app.exe)
 
+For a more customizable and hands-on approach, follow the directions below.
 ### Prerequisites
 - Python 3.8 or higher
 
@@ -26,7 +28,7 @@ For users who don't want to install Python, you can download the pre-built execu
 2. Create a virtual environment + activate it:
     ```bash
     python -m venv venv
-    venv\\Scripts\\activate
+    venv\Scripts\activate
 
 3. Install dependencies:
     ```bash
