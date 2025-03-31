@@ -112,56 +112,121 @@ class NSTWindow(QMainWindow):
         dark_theme = '''
             /* Main window background */
             QMainWindow {
-                background-color: #121212;
+                background-color: #1C2526;
             }
-            /* Main widget background */
-            QWidget {
-                background-color: #121212;
-            }
-            /* Labels */
+
+            /* Labels (for text and images) */
             QLabel {
-                color: #FFFFFF;
-                font-size: 16px;
-                font-weight: bold;
+                color: #B0B0B0;
+                font-size: 14px;
+                font-family: "Arial";
+                background-color: #2E3A3B;
+                border: none;
+                border-radius: 10px;
+                padding: 5px;
             }
+
+            /* Title label */
+            QLabel#titleLabel {
+                font-size: 22px;
+                font-weight: normal;
+                color: #D3D3D3; /* Light gray for subtle contrast */
+                background-color: #2E3A3B;
+                border-radius: 5px;
+                padding: 10px;
+                text-align: center;
+                text-transform: none;
+                font-family: "Arial", sans-serif;
+            }
+
             /* Buttons */
             QPushButton {
-                background-color: #1E1E1E;
-                color: #FFFFFF;
-                border: 1px solid #CE93D8;
+                background-color: #2E3A3B;
+                color: #B0B0B0;
+                font-size: 14px;
+                font-family: "Arial";
+                border: none;
+                border-radius: 10px;
                 padding: 10px;
-                font-size: 16px;
+                margin: 5px;
             }
             QPushButton:hover {
-                background-color: #CE93D8;
-                color: #000000;
+                background-color: #AB47BC; /* Purple background on hover */
+                color: #FFFFFF; /* White text on hover */
             }
+            QPushButton:pressed {
+                background-color: #7B1FA2;
+            }
+            QPushButton:disabled {
+                background-color: #555555;
+                color: #888888;
+            }
+
             /* Sliders */
             QSlider {
-                background-color: #1E1E1E;
-                color: #FFFFFF;
+                margin: 10px;
             }
             QSlider::groove:horizontal {
-                background: #1E1E1E;
-                height: 10px;
+                height: 8px;
+                background: #2E3A3B;
+                border: none;
+                border-radius: 4px;
             }
             QSlider::handle:horizontal {
-                background: #CE93D8;
-                width: 20px;
+                background: #4682B4;
+                border: none;
+                width: 18px;
                 margin: -5px 0;
+                border-radius: 9px;
             }
-            QSlider::add-page:horizontal {
-                background: #CE93D8;
+            QSlider::handle:horizontal:hover {
+                background: #AB47BC; /* No transition */
             }
-            QSlider::sub-page:horizontal {
-                background: #1E1E1E;
+
+            /* Progress Bar */
+            QProgressBar {
+                background-color: #2E3A3B;
+                border: none;
+                border-radius: 5px;
+                text-align: center;
+                color: #FFFFFF; /* White text for readability */
+                font-weight: bold;
             }
+            QProgressBar::chunk {
+                background-color: #4CAF50;
+                border-radius: 5px;
+            }
+
             /* Tooltips */
             QToolTip {
-                background-color: #1E1E1E;
-                color: #FFFFFF;
-                border: 1px solid #CE93D8;
+                background-color: #2E3A3B;
+                color: #B0B0B0;
+                border: none;
+                border-radius: 5px;
                 padding: 5px;
+            }
+
+            /* Message boxes */
+            QMessageBox {
+                background-color: #1C2526;
+                color: #B0B0B0;
+            }
+            QMessageBox QLabel {
+                color: #B0B0B0;
+                font-size: 14px;
+                font-family: "Arial";
+                background: transparent;
+                padding: 5px;
+            }
+            QMessageBox QPushButton {
+                background-color: #2E3A3B;
+                color: #B0B0B0;
+                border: none;
+                border-radius: 5px;
+                padding: 5px;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #AB47BC;
             }
         '''
         self.setStyleSheet(dark_theme)
@@ -176,27 +241,51 @@ class NSTWindow(QMainWindow):
         self.main_layout.setSpacing(20)
 
         # Our title label.
-        title_label = QLabel("Neural Style Transfer")
+        title_label = QLabel("Style Transfer : Transform Your Photos Into Works Of Art")
+        title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title_label.setStyleSheet("font-size: 24px; font-weight: bold; color: #CE93D8;")
         self.main_layout.addWidget(title_label)
 
         # Our image display area.
         image_layout = QHBoxLayout()
         image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         image_layout.setSpacing(20)
-        self.content_image_label = QLabel("Content Image")
+
+        # Our content layout.
+        content_layout = QVBoxLayout()
+        content_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        content_layout.setSpacing(10)
+        self.content_image = QLabel()
+        self.content_image_label = QLabel("CONTENT")
         self.content_image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.content_image_label.setFixedSize(300, 300)
-        self.style_image_label = QLabel("Style Image")
+        self.content_image.setFixedSize(300, 300)
+        content_layout.addWidget(self.content_image)
+        content_layout.addWidget(self.content_image_label)
+        image_layout.addLayout(content_layout)
+
+        # Our style layout.
+        style_layout = QVBoxLayout()
+        style_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        style_layout.setSpacing(10)
+        self.style_image = QLabel()
+        self.style_image_label = QLabel("STYLE")
         self.style_image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.style_image_label.setFixedSize(300, 300)
-        self.stylized_image_label = QLabel("Stylized Image")
+        self.style_image.setFixedSize(300, 300)
+        style_layout.addWidget(self.style_image)
+        style_layout.addWidget(self.style_image_label)
+        image_layout.addLayout(style_layout)
+
+        # Our stylized layout.
+        stylized_layout = QVBoxLayout()
+        stylized_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        stylized_layout.setSpacing(10)
+        self.stylized_image = QLabel()
+        self.stylized_image_label = QLabel("STYLIZED")
         self.stylized_image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.stylized_image_label.setFixedSize(300, 300)
-        image_layout.addWidget(self.content_image_label)
-        image_layout.addWidget(self.style_image_label)
-        image_layout.addWidget(self.stylized_image_label)
+        self.stylized_image.setFixedSize(300, 300)
+        stylized_layout.addWidget(self.stylized_image)
+        stylized_layout.addWidget(self.stylized_image_label)
+        image_layout.addLayout(stylized_layout)
         self.main_layout.addLayout(image_layout)
 
         # Our content + style image buttons.
@@ -260,42 +349,68 @@ class NSTWindow(QMainWindow):
         param_layout = QVBoxLayout()
         param_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         param_layout.setSpacing(10)
+
+        # Our style weight slider.
+        style_layout = QHBoxLayout()
+        style_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        style_layout.setSpacing(10)
+        self.style_weight_label = QLabel("Style Weight: 1000000")
+        self.style_weight_label.setFixedSize(200, 30)
         self.style_weight_slider = QSlider(Qt.Orientation.Horizontal)
-        self.style_weight_slider.setRange(0, 1000)
-        self.style_weight_slider.setValue(1000)
+        self.style_weight_slider.setRange(0, 1000000)
+        self.style_weight_slider.setValue(1000000)
         self.style_weight_slider.setTickInterval(100)
         self.style_weight_slider.setSingleStep(10)
         self.style_weight_slider.setPageStep(100)
         self.style_weight_slider.setToolTip("Style Weight")
         self.style_weight_slider.setTracking(True)
         self.style_weight_slider.valueChanged.connect(self.update_style_weight_label)
-        self.style_weight_label = QLabel("Style Weight: 1000")
+        self.style_weight_slider.setCursor(Qt.CursorShape.PointingHandCursor)
+        style_layout.addWidget(self.style_weight_label)
+        style_layout.addWidget(self.style_weight_slider)
+        param_layout.addLayout(style_layout)
+
+        # Our content weight slider.
+        content_layout = QHBoxLayout()
+        content_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        content_layout.setSpacing(10)
+        self.content_weight_label = QLabel("Content Weight: 1")
+        self.content_weight_label.setFixedSize(200, 30)
         self.content_weight_slider = QSlider(Qt.Orientation.Horizontal)
-        self.content_weight_slider.setRange(0, 1000)
-        self.content_weight_slider.setValue(100)
+        self.content_weight_slider.setRange(-1000, 1000)
+        self.content_weight_slider.setValue(1)
         self.content_weight_slider.setTickInterval(100)
         self.content_weight_slider.setSingleStep(10)
         self.content_weight_slider.setPageStep(100)
         self.content_weight_slider.setToolTip("Content Weight")
         self.content_weight_slider.setTracking(True)
         self.content_weight_slider.valueChanged.connect(self.update_content_weight_label)
-        self.content_weight_label = QLabel("Content Weight: 100")
+        self.content_weight_slider.setCursor(Qt.CursorShape.PointingHandCursor)
+        content_layout.addWidget(self.content_weight_label)
+        content_layout.addWidget(self.content_weight_slider)
+        param_layout.addLayout(content_layout)
+
+        # Our number of steps slider.
+        num_steps_layout = QHBoxLayout()
+        num_steps_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        num_steps_layout.setSpacing(10)
+        self.num_steps_label = QLabel("Number of Steps: 300")
+        self.num_steps_label.setFixedSize(200, 30)
         self.num_steps_slider = QSlider(Qt.Orientation.Horizontal)
-        self.num_steps_slider.setRange(1, 1000)
-        self.num_steps_slider.setValue(500)
+        self.num_steps_slider.setRange(1, 500)
+        self.num_steps_slider.setValue(300)
         self.num_steps_slider.setTickInterval(100)
         self.num_steps_slider.setSingleStep(10)
         self.num_steps_slider.setPageStep(100)
         self.num_steps_slider.setToolTip("Number of Steps")
         self.num_steps_slider.setTracking(True)
         self.num_steps_slider.valueChanged.connect(self.update_num_steps_label)
-        self.num_steps_label = QLabel("Number of Steps: 500")
-        param_layout.addWidget(self.style_weight_label)
-        param_layout.addWidget(self.style_weight_slider)
-        param_layout.addWidget(self.content_weight_label)
-        param_layout.addWidget(self.content_weight_slider)
-        param_layout.addWidget(self.num_steps_label)
-        param_layout.addWidget(self.num_steps_slider)
+        self.num_steps_slider.setCursor(Qt.CursorShape.PointingHandCursor)
+        num_steps_layout.addWidget(self.num_steps_label)
+        num_steps_layout.addWidget(self.num_steps_slider)
+        param_layout.addLayout(num_steps_layout)
+
+        # Add our params. to the main layout.
         self.main_layout.addLayout(param_layout)
 
     def load_content_image(self):
@@ -305,7 +420,7 @@ class NSTWindow(QMainWindow):
             # Load the content image and display it.
             self.content_image_path = filename
             content_image = QPixmap(filename).scaled(300, 300, Qt.AspectRatioMode.IgnoreAspectRatio)
-            self.content_image_label.setPixmap(content_image)
+            self.content_image.setPixmap(content_image)
 
             # Enable the run button if both images are loaded.
             if self.content_image_path and self.style_image_path:
@@ -318,7 +433,7 @@ class NSTWindow(QMainWindow):
             # Load the style image and display it.
             self.style_image_path = filename
             style_image = QPixmap(filename).scaled(300, 300, Qt.AspectRatioMode.IgnoreAspectRatio)
-            self.style_image_label.setPixmap(style_image)
+            self.style_image.setPixmap(style_image)
 
         # Enable the run button if both images are loaded.
         if self.content_image_path and self.style_image_path:
@@ -334,8 +449,12 @@ class NSTWindow(QMainWindow):
         content_weight = self.content_weight_slider.value()
         num_steps = self.num_steps_slider.value()
 
-        # Disable the run button and show the progress bar.
+        # Disable all buttons and show the progress bar.
+        self.load_content_button.setEnabled(False)
+        self.load_style_button.setEnabled(False)
         self.run_button.setEnabled(False)
+        self.save_button.setEnabled(False)
+        self.reset_button.setEnabled(False)
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
 
@@ -356,10 +475,13 @@ class NSTWindow(QMainWindow):
     def on_nst_finished(self, stylized_image_path):
         # Load the stylized image and display it.
         stylized_image = QPixmap(stylized_image_path).scaled(300, 300, Qt.AspectRatioMode.IgnoreAspectRatio)
-        self.stylized_image_label.setPixmap(stylized_image)
+        self.stylized_image.setPixmap(stylized_image)
 
-        # Enable the run and save buttons and hide the progress bar.
+        # Enable the all buttons and hide the progress bar.
+        self.load_content_button.setEnabled(True)
+        self.load_style_button.setEnabled(True)
         self.run_button.setEnabled(True)
+        self.reset_button.setEnabled(True)
         self.save_button.setEnabled(True)
         self.progress_bar.setVisible(False)
 
@@ -373,7 +495,7 @@ class NSTWindow(QMainWindow):
         self.reset_ui()
 
     def save_stylized_image(self):
-        if not self.stylized_image_label.pixmap():
+        if not self.stylized_image.pixmap():
             QMessageBox.warning(self, "Error", "No stylized image to save.")
             return
 
@@ -381,25 +503,30 @@ class NSTWindow(QMainWindow):
 
         if filename:
             # Save the stylized image.
-            pixmap = self.stylized_image_label.pixmap()
+            pixmap = self.stylized_image.pixmap()
             pixmap.save(filename)
             QMessageBox.information(self, "Success", "Stylized image saved successfully!")
 
     def reset_ui(self):
         # Reset the image labels and paths.
-        self.content_image_label.clear()
-        self.style_image_label.clear()
-        self.stylized_image_label.clear()
+        self.content_image.clear()
+        self.style_image.clear()
+        self.stylized_image.clear()
         self.content_image_path = None
         self.style_image_path = None
 
         # Reset the sliders and labels.
-        self.style_weight_slider.setValue(1000)
-        self.content_weight_slider.setValue(100)
-        self.num_steps_slider.setValue(500)
-        self.update_style_weight_label(1000)
-        self.update_content_weight_label(100)
-        self.update_num_steps_label(500)
+        self.style_weight_slider.setValue(1000000)
+        self.content_weight_slider.setValue(1)
+        self.num_steps_slider.setValue(300)
+        self.update_style_weight_label(1000000)
+        self.update_content_weight_label(1)
+        self.update_num_steps_label(300)
+
+        # Enable the load buttons + reset button.
+        self.load_content_button.setEnabled(True)
+        self.load_style_button.setEnabled(True)
+        self.reset_button.setEnabled(True)
 
         # Disable the run and save buttons.
         self.run_button.setEnabled(False)
