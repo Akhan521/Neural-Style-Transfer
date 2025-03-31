@@ -99,17 +99,18 @@ def get_nst_model_and_losses(cnn, norm_mean, norm_std,
 
     return model, style_losses, content_losses
     
-def get_input_optimizer(input_image):
-    # Create an Adam optimizer to update the input image.
+def get_input_optimizer(input_image, optimizer="LBFGS"):
     # We provide the input image as the parameter to be optimized (requires a gradient).
-    # optimizer = optim.Adam([input_image], lr=0.02, betas=[0.99, 0.999], eps=1e-1)
-    optimizer = optim.LBFGS([input_image], lr=1.0, max_iter=20, history_size=10)
+    if optimizer == "Adam":
+        optimizer = optim.Adam([input_image], lr=0.01, betas=[0.9, 0.999], eps=1e-8)
+    # Otherwise, we use LBFGS as the default optimizer.
+    optimizer = optim.LBFGS([input_image], lr=1.0, max_iter=30, history_size=20)
     return optimizer
 
 def run_style_transfer(cnn, norm_mean, norm_std,
                        content_image, style_image, input_image,
                        num_steps=300, style_weight=1e6, content_weight=1e0,
-                       progress_callback=None):
+                       optimizer="LBFGS", progress_callback=None):
     
     # # To display our intermediate images...
     # plt.ion()
@@ -131,8 +132,8 @@ def run_style_transfer(cnn, norm_mean, norm_std,
     model.eval() 
     model.requires_grad_(False)
 
-    # Create an Adam optimizer to update the input image.
-    optimizer = get_input_optimizer(input_image)
+    # Create an optimizer to update the input image.
+    optimizer = get_input_optimizer(input_image, optimizer)
 
     # Run the style transfer process.
     iteration = [0]

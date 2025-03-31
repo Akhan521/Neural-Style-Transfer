@@ -19,7 +19,7 @@ from PIL import Image, ImageQt
 import matplotlib.pyplot as plt
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLabel, QSlider, QLineEdit, QFileDialog, QMessageBox,
-                             QProgressBar, QToolTip)
+                             QProgressBar, QToolTip, QSizePolicy)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QPixmap, QImage, QIcon
 
@@ -33,7 +33,7 @@ class NSTWorker(QThread):
     finished = pyqtSignal(QImage)
     error = pyqtSignal(str)
 
-    def __init__(self, cnn, content_image_path, style_image_path, num_steps, style_weight, content_weight):
+    def __init__(self, cnn, content_image_path, style_image_path, num_steps, style_weight, content_weight, optimizer="LBFGS"):
         super().__init__()
         self.cnn = cnn
         self.content_image_path = content_image_path
@@ -41,6 +41,7 @@ class NSTWorker(QThread):
         self.num_steps = num_steps
         self.style_weight = style_weight
         self.content_weight = content_weight
+        self.optimizer = optimizer
     
     def run(self):
         try:
@@ -54,7 +55,7 @@ class NSTWorker(QThread):
                 self.cnn, cnn_norm_mean, cnn_norm_std,
                 content_image, style_image, input_image,
                 num_steps=self.num_steps, style_weight=self.style_weight, content_weight=self.content_weight,
-                progress_callback=self.update_progress
+                optimizer=self.optimizer, progress_callback=self.update_progress
             )
 
             # Convert our stylized image tensor to a PIL image.
@@ -297,8 +298,8 @@ class NSTWindow(QMainWindow):
         button_layout.addWidget(self.load_style_button)
         self.main_layout.addLayout(button_layout)
 
-        # Our parameter sliders.
-        self.init_param_sliders()
+        # Our parameters.
+        self.init_params()
 
         # Our action buttons: Run and Save.
         action_layout = QHBoxLayout()
@@ -339,24 +340,47 @@ class NSTWindow(QMainWindow):
         self.progress_bar.setVisible(False)
         self.main_layout.addWidget(self.progress_bar)
 
-    def init_param_sliders(self):
-        # Our parameter sliders.
+    def init_params(self):
         param_layout = QVBoxLayout()
-        param_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        param_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         param_layout.setSpacing(10)
 
+        # Our optimizer options:
+        optim_layout = QHBoxLayout()
+        optim_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        optim_layout.setSpacing(10)
+        self.optim_label = QLabel("Optimizer: LBFGS")
+        self.optim_label.setFixedSize(200, 40)
+        self.optim_label.setToolTip("Optimizer: LBFGS")
+        self.lbfgs_button = QPushButton("LBFGS: Slower Style Transfer / More Accurate")
+        self.lbfgs_button.clicked.connect(lambda: self.update_optim_label("LBFGS"))
+        self.lbfgs_button.setToolTip("LBFGS Optimizer: More accurate style transfer but slower. Takes less steps to converge.")
+        self.lbfgs_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.lbfgs_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.adam_button = QPushButton("Adam: Faster Style Transfer / Less Accurate")
+        self.adam_button.clicked.connect(lambda: self.update_optim_label("Adam"))
+        self.adam_button.setToolTip("Adam Optimizer: Faster style transfer but less accurate. Takes far more steps to converge.")
+        self.adam_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.adam_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.active_optimizer = "LBFGS"
+        optim_layout.addWidget(self.optim_label)
+        optim_layout.addWidget(self.lbfgs_button)
+        optim_layout.addWidget(self.adam_button)
+        param_layout.addLayout(optim_layout)
+
+        # Our parameter sliders:
         # Our style weight slider.
         style_layout = QHBoxLayout()
         style_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         style_layout.setSpacing(10)
-        self.style_weight_label = QLabel("Style Weight: 1000000")
-        self.style_weight_label.setFixedSize(200, 30)
+        self.style_weight_label = QLabel("Style Weight: 100000")
+        self.style_weight_label.setFixedSize(200, 40)
         self.style_weight_slider = QSlider(Qt.Orientation.Horizontal)
-        self.style_weight_slider.setRange(0, 1000000)
-        self.style_weight_slider.setValue(1000000)
-        self.style_weight_slider.setTickInterval(100)
-        self.style_weight_slider.setSingleStep(10)
-        self.style_weight_slider.setPageStep(100)
+        self.style_weight_slider.setRange(0, 100000)
+        self.style_weight_slider.setValue(100000)
+        self.style_weight_slider.setTickInterval(10000)
+        self.style_weight_slider.setSingleStep(1)
+        self.style_weight_slider.setPageStep(10000)
         self.style_weight_slider.setToolTip("Style Weight")
         self.style_weight_slider.setTracking(True)
         self.style_weight_slider.valueChanged.connect(self.update_style_weight_label)
@@ -370,12 +394,12 @@ class NSTWindow(QMainWindow):
         content_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         content_layout.setSpacing(10)
         self.content_weight_label = QLabel("Content Weight: 1")
-        self.content_weight_label.setFixedSize(200, 30)
+        self.content_weight_label.setFixedSize(200, 40)
         self.content_weight_slider = QSlider(Qt.Orientation.Horizontal)
-        self.content_weight_slider.setRange(-1000, 1000)
+        self.content_weight_slider.setRange(0, 1000)
         self.content_weight_slider.setValue(1)
         self.content_weight_slider.setTickInterval(100)
-        self.content_weight_slider.setSingleStep(10)
+        self.content_weight_slider.setSingleStep(1)
         self.content_weight_slider.setPageStep(100)
         self.content_weight_slider.setToolTip("Content Weight")
         self.content_weight_slider.setTracking(True)
@@ -390,9 +414,9 @@ class NSTWindow(QMainWindow):
         num_steps_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         num_steps_layout.setSpacing(10)
         self.num_steps_label = QLabel("Number of Steps: 300")
-        self.num_steps_label.setFixedSize(200, 30)
+        self.num_steps_label.setFixedSize(200, 40)
         self.num_steps_slider = QSlider(Qt.Orientation.Horizontal)
-        self.num_steps_slider.setRange(1, 500)
+        self.num_steps_slider.setRange(1, 1000)
         self.num_steps_slider.setValue(300)
         self.num_steps_slider.setTickInterval(100)
         self.num_steps_slider.setSingleStep(10)
@@ -445,6 +469,8 @@ class NSTWindow(QMainWindow):
         num_steps = self.num_steps_slider.value()
 
         # Disable all buttons and show the progress bar.
+        self.lbfgs_button.setEnabled(False)
+        self.adam_button.setEnabled(False)
         self.load_content_button.setEnabled(False)
         self.load_style_button.setEnabled(False)
         self.run_button.setEnabled(False)
@@ -456,7 +482,7 @@ class NSTWindow(QMainWindow):
         # Create a new worker thread to run the style transfer.
         self.worker = NSTWorker(
             self.cnn, self.content_image_path, self.style_image_path,
-            num_steps, style_weight, content_weight
+            num_steps, style_weight, content_weight, self.active_optimizer
         )
         self.worker.progress.connect(self.update_progress)
         self.worker.finished.connect(self.on_nst_finished)
@@ -467,12 +493,36 @@ class NSTWindow(QMainWindow):
         # Update the progress bar with the current progress.
         self.progress_bar.setValue(progress)
 
+    def update_optim_label(self, optim):
+        # Update the optimizer label and set the active optimizer.
+        self.optim_label.setText(f"Optimizer: {optim}")
+        self.active_optimizer = optim
+        self.optim_label.setToolTip(f"Optimizer: {optim}")
+
+        # Update default parameters based on the optimizer.
+        if optim == "LBFGS":
+            self.style_weight_slider.setValue(100000)
+            self.content_weight_slider.setValue(1)
+            self.num_steps_slider.setValue(300)
+            self.update_style_weight_label(100000)
+            self.update_content_weight_label(1)
+            self.update_num_steps_label(300)
+        else:
+            self.style_weight_slider.setValue(100000)
+            self.content_weight_slider.setValue(500)
+            self.num_steps_slider.setValue(1000)
+            self.update_style_weight_label(100000)
+            self.update_content_weight_label(500)
+            self.update_num_steps_label(1000)
+
     def on_nst_finished(self, stylized_image):
         # Load the stylized image and display it.
         stylized_image = QPixmap.fromImage(stylized_image).scaled(300, 300, Qt.AspectRatioMode.IgnoreAspectRatio)
         self.stylized_image.setPixmap(stylized_image)
 
         # Enable the all buttons and hide the progress bar.
+        self.lbfgs_button.setEnabled(True)
+        self.adam_button.setEnabled(True)
         self.load_content_button.setEnabled(True)
         self.load_style_button.setEnabled(True)
         self.run_button.setEnabled(True)
@@ -523,13 +573,22 @@ class NSTWindow(QMainWindow):
         self.content_image_path = None
         self.style_image_path = None
 
+        # Reset the active optimizer.
+        self.active_optimizer = "LBFGS"
+        self.optim_label.setText("Optimizer: LBFGS")
+        self.optim_label.setToolTip("Optimizer: LBFGS")
+
         # Reset the sliders and labels.
-        self.style_weight_slider.setValue(1000000)
+        self.style_weight_slider.setValue(100000)
         self.content_weight_slider.setValue(1)
         self.num_steps_slider.setValue(300)
-        self.update_style_weight_label(1000000)
+        self.update_style_weight_label(100000)
         self.update_content_weight_label(1)
         self.update_num_steps_label(300)
+
+        # Enable the optimizer buttons.
+        self.lbfgs_button.setEnabled(True)
+        self.adam_button.setEnabled(True)
 
         # Enable the load buttons + reset button.
         self.load_content_button.setEnabled(True)
