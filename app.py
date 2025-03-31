@@ -15,20 +15,22 @@ from utils.image_loader import load_image, tensor_to_image
 from modules.normalization.norm import cnn_norm_mean, cnn_norm_std
 from model.nst_model import run_style_transfer
 
-from PIL import Image
+from PIL import Image, ImageQt
 import matplotlib.pyplot as plt
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLabel, QSlider, QLineEdit, QFileDialog, QMessageBox,
                              QProgressBar, QToolTip)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QPixmap, QImage
+from PyQt6.QtGui import QPixmap, QImage, QIcon
 
 from werkzeug.utils import secure_filename
 
 # A worker thread to run the style transfer in the background.
 class NSTWorker(QThread):
+    # To emit the progress signal with the current step.
     progress = pyqtSignal(int)
-    finished = pyqtSignal(str)
+    # To emit the finished signal with the stylized image.
+    finished = pyqtSignal(QImage)
     error = pyqtSignal(str)
 
     def __init__(self, cnn, content_image_path, style_image_path, num_steps, style_weight, content_weight):
@@ -39,7 +41,6 @@ class NSTWorker(QThread):
         self.num_steps = num_steps
         self.style_weight = style_weight
         self.content_weight = content_weight
-        self.stylized_image_path = 'images/stylized_images/'
     
     def run(self):
         try:
@@ -58,18 +59,11 @@ class NSTWorker(QThread):
 
             # Convert our stylized image tensor to a PIL image.
             stylized_image = tensor_to_image(stylized_image)
-
-            # Prepare the stylized image for saving.
-            adjusted_content_filename = self.content_image_path.rsplit('.', 1)[0].rsplit('/', 1)[-1]
-            adjusted_content_filename = secure_filename(adjusted_content_filename)
-            adjusted_style_filename = self.style_image_path.rsplit('/', 1)[-1]
-            adjusted_style_filename = secure_filename(adjusted_style_filename)
-            stylized_image_filename = f'{adjusted_content_filename}_as_{adjusted_style_filename}'
-            stylized_image_path = os.path.join(self.stylized_image_path, stylized_image_filename)
-            stylized_image.save(stylized_image_path)
+            # Convert the PIL image to a QImage for display.
+            stylized_image = ImageQt.ImageQt(stylized_image)
 
             # Emit the finished signal with the path to the stylized image.
-            self.finished.emit(stylized_image_path)
+            self.finished.emit(stylized_image)
 
         except Exception as e:
             # Emit the error signal with the error message.
@@ -86,6 +80,7 @@ class NSTWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Neural Style Transfer")
+        self.setWindowIcon(QIcon("nst_icon.ico"))
         self.setGeometry(100, 100, 1000, 800)
         self.setMinimumSize(800, 600)
 
@@ -472,9 +467,9 @@ class NSTWindow(QMainWindow):
         # Update the progress bar with the current progress.
         self.progress_bar.setValue(progress)
 
-    def on_nst_finished(self, stylized_image_path):
+    def on_nst_finished(self, stylized_image):
         # Load the stylized image and display it.
-        stylized_image = QPixmap(stylized_image_path).scaled(300, 300, Qt.AspectRatioMode.IgnoreAspectRatio)
+        stylized_image = QPixmap.fromImage(stylized_image).scaled(300, 300, Qt.AspectRatioMode.IgnoreAspectRatio)
         self.stylized_image.setPixmap(stylized_image)
 
         # Enable the all buttons and hide the progress bar.
@@ -499,7 +494,14 @@ class NSTWindow(QMainWindow):
             QMessageBox.warning(self, "Error", "No stylized image to save.")
             return
 
-        filename, _ = QFileDialog.getSaveFileName(self, "Save Stylized Image", "", "Images (*.png *.jpg *.jpeg)")
+        # Prepare the stylized image for saving.
+        adjusted_content_filename = self.content_image_path.rsplit('.', 1)[0].rsplit('/', 1)[-1]
+        adjusted_content_filename = secure_filename(adjusted_content_filename)
+        adjusted_style_filename = self.style_image_path.rsplit('/', 1)[-1]
+        adjusted_style_filename = secure_filename(adjusted_style_filename)
+        stylized_image_filename = f'{adjusted_content_filename}_as_{adjusted_style_filename}'
+
+        filename, _ = QFileDialog.getSaveFileName(self, "Save Stylized Image", stylized_image_filename, "Images (*.png *.jpg *.jpeg)")
 
         if filename:
             # Save the stylized image.
@@ -507,11 +509,17 @@ class NSTWindow(QMainWindow):
             pixmap.save(filename)
             QMessageBox.information(self, "Success", "Stylized image saved successfully!")
 
+    def clear_images(self):
+        for image in [self.content_image, self.style_image, self.stylized_image]:
+            # Clear the image pixmap.
+            image.setPixmap(QPixmap())
+            image.clear()
+            # Force a repaint to ensure the image is cleared.
+            image.repaint()
+
     def reset_ui(self):
         # Reset the image labels and paths.
-        self.content_image.clear()
-        self.style_image.clear()
-        self.stylized_image.clear()
+        self.clear_images()
         self.content_image_path = None
         self.style_image_path = None
 

@@ -2,8 +2,13 @@
 __pycache__/
 *.pyc
 
+# PyInstaller files
+*.spec
+dist/
+build/
+
 # Ignore virtual environments
-venv/
+.venv/
 .env/
 
 # Ignore static files (stored in Firebase Storage)
