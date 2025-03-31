@@ -393,11 +393,11 @@ class NSTWindow(QMainWindow):
         content_layout = QHBoxLayout()
         content_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         content_layout.setSpacing(10)
-        self.content_weight_label = QLabel("Content Weight: 1")
+        self.content_weight_label = QLabel("Content Weight: 10")
         self.content_weight_label.setFixedSize(200, 40)
         self.content_weight_slider = QSlider(Qt.Orientation.Horizontal)
         self.content_weight_slider.setRange(0, 1000)
-        self.content_weight_slider.setValue(1)
+        self.content_weight_slider.setValue(10)
         self.content_weight_slider.setTickInterval(100)
         self.content_weight_slider.setSingleStep(1)
         self.content_weight_slider.setPageStep(100)
@@ -502,10 +502,10 @@ class NSTWindow(QMainWindow):
         # Update default parameters based on the optimizer.
         if optim == "LBFGS":
             self.style_weight_slider.setValue(100000)
-            self.content_weight_slider.setValue(1)
+            self.content_weight_slider.setValue(10)
             self.num_steps_slider.setValue(300)
             self.update_style_weight_label(100000)
-            self.update_content_weight_label(1)
+            self.update_content_weight_label(10)
             self.update_num_steps_label(300)
         else:
             self.style_weight_slider.setValue(100000)
@@ -580,10 +580,10 @@ class NSTWindow(QMainWindow):
 
         # Reset the sliders and labels.
         self.style_weight_slider.setValue(100000)
-        self.content_weight_slider.setValue(1)
+        self.content_weight_slider.setValue(10)
         self.num_steps_slider.setValue(300)
         self.update_style_weight_label(100000)
-        self.update_content_weight_label(1)
+        self.update_content_weight_label(10)
         self.update_num_steps_label(300)
 
         # Enable the optimizer buttons.

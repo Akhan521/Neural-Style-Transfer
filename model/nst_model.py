@@ -109,7 +109,7 @@ def get_input_optimizer(input_image, optimizer="LBFGS"):
 
 def run_style_transfer(cnn, norm_mean, norm_std,
                        content_image, style_image, input_image,
-                       num_steps=300, style_weight=1e6, content_weight=1e0,
+                       num_steps=300, style_weight=1e5, content_weight=1e1,
                        optimizer="LBFGS", progress_callback=None):
     
     # # To display our intermediate images...
