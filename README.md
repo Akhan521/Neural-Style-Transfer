@@ -16,7 +16,7 @@ We find that by modifying our content and/or style weights (to consider content/
     <img src="https://github.com/Akhan521/Neural-Style-Transfer/blob/main/screenshots/style_loss_only.png" alt="Style Loss Only" width="75%">
     <p>Considering Only Style Loss</p>
   </div>
-  <div style="margin-bottom: 20px; text-align: center;">
+  <div style="text-align: center;">
     <img src="https://github.com/Akhan521/Neural-Style-Transfer/blob/main/screenshots/tiger_as_starry_night.png" alt="Tiger in Starry Night Style" width="75%">
     <p>Considering Both Content and Style Losses</p>
   </div>
