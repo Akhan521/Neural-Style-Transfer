@@ -26,7 +26,7 @@ unloader = transforms.ToPILImage()
 
 def load_image(image_path):
     # Load the image using PIL.
-    image = Image.open(image_path)
+    image = Image.open(image_path).convert("RGB") # Convert to RGB to ensure compatibility.
 
     # Transform the image and add a dummy batch dimension to fit the model's input dimensions.
     image = loader(image).unsqueeze(0)
