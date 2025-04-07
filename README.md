@@ -8,16 +8,16 @@ Given a style reference image and a content reference image, the neural style tr
 ## Considering Content/Style Loss Tradeoffs
 We find that by modifying our content and/or style weights (to consider content/style loss), we can achieve different effects in our stylized image. When we construct our new, stylized image considering only content loss, we are essentially reconstructing our initial content image. On the other hand, if we only consider style loss, we lose content quality but have greater stylization. If we manage to strike a balance with the rightly chosen weights, we can achieve a stylized image that encapsulates the content and style of our reference images. Below we see an example of the effects of content/style loss on our generated image; we see from top to bottom: a stylized image prioritizing content-loss only, prioritizing style-loss only, and prioritizing both losses.
 <div style="display: flex; flex-direction: column; align-items: center;">
-  <div style="margin-bottom: 20px;">
-    <img src="https://github.com/Akhan521/Neural-Style-Transfer/blob/main/screenshots/content_loss_only.png" alt="Content Loss Only">
+  <div style="margin-bottom: 20px; text-align: center">
+    <img src="https://github.com/Akhan521/Neural-Style-Transfer/blob/main/screenshots/content_loss_only.png" alt="Content Loss Only" width="50%">
     <p>Considering Only Content Loss</p>
   </div>
-  <div style="margin-bottom: 20px;">
-    <img src="https://github.com/Akhan521/Neural-Style-Transfer/blob/main/screenshots/style_loss_only.png" alt="Style Loss Only">
+  <div style="margin-bottom: 20px; text-align: center">
+    <img src="https://github.com/Akhan521/Neural-Style-Transfer/blob/main/screenshots/style_loss_only.png" alt="Style Loss Only" width="50%">
     <p>Considering Only Style Loss</p>
   </div>
-  <div style="margin-bottom: 20px;">
-    <img src="https://github.com/Akhan521/Neural-Style-Transfer/blob/main/screenshots/tiger_as_starry_night.png" alt="Tiger in Starry Night Style">
+  <div style="margin-bottom: 20px; text-align: center">
+    <img src="https://github.com/Akhan521/Neural-Style-Transfer/blob/main/screenshots/tiger_as_starry_night.png" alt="Tiger in Starry Night Style" width="50%">
     <p>Considering Both Content and Style Losses</p>
   </div>
 </div>
