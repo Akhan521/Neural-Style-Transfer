@@ -2,7 +2,7 @@
 '''
 A PyQt6 app that demonstrates Neural Style Transfer using PyTorch.
 '''
-
+import sys
 import os
 import torch
 import torch.nn as nn
@@ -76,12 +76,20 @@ class NSTWorker(QThread):
         self.progress.emit(progress_percentage)
 
 
+# A function to get the resource path of images and icons (for PyInstaller).
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    else:
+        return os.path.join(os.path.dirname(__file__), relative_path)
+    
 class NSTWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Neural Style Transfer")
-        self.setWindowIcon(QIcon("nst_icon.ico"))
+        icon_path = resource_path("nst_icon.ico")
+        self.setWindowIcon(QIcon(icon_path))
         self.setGeometry(100, 100, 1000, 800)
         self.setMinimumSize(800, 600)
 
