@@ -31,7 +31,7 @@ We find that by modifying our content and/or style weights (to consider content/
 
 ###  🗂️ Download
 For users who don't want to install Python, you can download the pre-built executable below:
-- [Windows Executable](https://github.com/Akhan521/Neural-Style-Transfer/releases/download/v1.0.0/app.exe)
+- [Windows Executable](https://github.com/Akhan521/Neural-Style-Transfer/releases/download/v1.0.1/app.exe)
 
 For a more customizable and hands-on approach, follow the directions below.
 ### Prerequisites
