@@ -1,4 +1,4 @@
-# 🖌️ Neural Style Transfer: Reimagining Images Through AI
+# 🖌️ Neural Style Transfer: Reimagine Images Through AI
 
 Transform your photos into works of art, powered by AI and deep learning! This project brings the power of neural style transfer to your fingertips, letting you blend the content of one image with the artistic style of another. I built this project using PyTorch and PyQt6 as a hands-on way to explore how AI can see, understand, and reimagine images, all through an interactive desktop app.
 
